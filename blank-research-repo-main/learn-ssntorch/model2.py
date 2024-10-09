@@ -40,11 +40,21 @@ num_inputs = ROWS*COLS
 num_hidden = ROWS*COLS*HIDDEN_RATIO
 num_outputs = 2
 
+# temp dynamics
+num_steps = 25
+
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.flatten = torch.flatten
-        self.lif = snn.Leaky
+        # stage 1: transform from floats to ints using leaky and convolution
+        self.lif1 = snn.Leaky()
+        self.fc1 = nn.Linear(num_inputs, num_hidden)
+        self.lif2 = snn.Leaky()
+        self.fc2 = nn.Linear(num_hidden, num_inputs)
+        
+        # convert a bunch of neuron pulses to one mat
+        self.conv = nn.Conv2d(num_steps, 1)
+
         self.conv_stack = nn.Sequential(
             # rows*cols -> (rows*2, cols)
             nn.Conv1d(ROWS, ROWS*2, 1),
